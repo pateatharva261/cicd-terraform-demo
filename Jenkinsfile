@@ -53,6 +53,21 @@ pipeline {
                 '''
             }
         }
+
+        stage('Terraform Validate and Plan') {
+            steps {
+                dir('terraform') {
+                    sh '''
+                        terraform init -input=false
+                        terraform fmt -check
+                        terraform validate
+                        terraform plan -input=false -out=tfplan
+                        terraform show -no-color tfplan > plan-output.txt
+                    '''
+                }
+                archiveArtifacts artifacts: 'terraform/plan-output.txt', fingerprint: true
+            }
+        }
     }
 
     post {
